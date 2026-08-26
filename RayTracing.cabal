@@ -1,0 +1,21 @@
+cabal-version:      3.0
+name:               RayTracing
+version:            0.1.0.0
+synopsis:           Functional Ray Tracer in Haskell
+homepage:           https://github.com/rlwq/RayTracing
+license:            MIT
+license-file:       LICENSE
+author:             Karnavski S.
+maintainer:         carnavschii2007@gmail.com
+category:           Graphics
+build-type:         Simple
+
+common warnings
+    ghc-options: -Wall
+
+executable RayTracing
+    import:           warnings
+    main-is:          Main.hs
+    build-depends:    base ^>=4.20.2.0
+    hs-source-dirs:   app
+    default-language: Haskell2010
