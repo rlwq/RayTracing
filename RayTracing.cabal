@@ -10,12 +10,23 @@ maintainer:         carnavschii2007@gmail.com
 category:           Graphics
 build-type:         Simple
 
-common warnings
-    ghc-options: -Wall
+common defaults
+    ghc-options:        -Wall
+    default-extensions: InstanceSigs
+
+library
+    import:           defaults
+    hs-source-dirs:   src
+    exposed-modules:  Algebra
+                    , Geometry
+                    , Mesh
+    build-depends:    array ^>=0.5.8.0, base ^>=4.20.2.0
+    default-language: Haskell2010
 
 executable RayTracing
-    import:           warnings
+    import:           defaults
     main-is:          Main.hs
     build-depends:    base ^>=4.20.2.0
+                    , RayTracing
     hs-source-dirs:   app
     default-language: Haskell2010
