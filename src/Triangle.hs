@@ -1,14 +1,11 @@
-module Geometry (
-    Ray (..),
+module Triangle (
     Triangle,
     intersectTriangle,
 ) where
 
 import Algebra
 import Control.Monad (guard)
-
-data Ray = Ray Point Direction
-    deriving (Show, Eq)
+import Ray
 
 type Triangle = (,,) Point Point Point
 

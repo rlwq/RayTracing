@@ -3,13 +3,13 @@ module Mesh (
     VertexId,
     FaceId,
     Face,
-    intersectMesh,
+    meshShape,
 ) where
 
 import Algebra
 import Data.Array
-import Data.Semigroup (Arg (Arg), Min (Min))
-import Geometry
+import Shape
+import Triangle
 
 type VertexId = Int
 
@@ -21,12 +21,14 @@ type Face = (VertexId, VertexId, VertexId)
 
 data Mesh = Mesh (Array VertexId Vertex) (Array FaceId Face)
 
-intersectMesh :: Ray -> Mesh -> Maybe (Distance, FaceId)
-intersectMesh ray (Mesh vertices faces) =
-    unwrap <$> foldMap mintersectFace (assocs faces)
+meshShape :: Mesh -> Shape
+meshShape (Mesh vertices faces) =
+    Shape (\ray -> foldMap (intersectFace ray) (elems faces))
   where
-    triangle (a, b, c) = (vertices ! a, vertices ! b, vertices ! c)
-    intersectFace face = intersectTriangle ray (triangle face)
-    mintersectFace (i, face) =
-        (\(t, _) -> Min (Arg t i)) <$> intersectFace face
-    unwrap (Min (Arg t i)) = (t, i)
+    intersectFace ray (i, j, k) = case intersectTriangle ray (a, b, c) of
+        Nothing -> Missed
+        Just (t, p) -> Hit t p (normalize (cross (b - a) (c - a))) (splat 1)
+      where
+        a = vertices ! i
+        b = vertices ! j
+        c = vertices ! k

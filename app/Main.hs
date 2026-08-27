@@ -5,18 +5,16 @@ import Camera
 import Data.Array
 import Image
 import Mesh
+import Scene
+import Shape
 
 main :: IO ()
 main = writePPM "out.ppm" (map (map shade) hits)
   where
-    hits = map (map (`intersectMesh` scene)) (primaryRays (600, 400) camera)
-    depths = [t | row <- hits, Just (t, _) <- row]
-    (near, far) = case depths of
-        [] -> (0, 1)
-        _ -> (minimum depths, maximum depths)
-    span' = max 1e-6 (far - near)
-    shade Nothing = Vec3 0.04 0.05 0.08
-    shade (Just (t, _)) = splat (1 - (t - near) / span')
+    hits = map (map (`traceRay` scene)) (primaryRays (600, 400) camera)
+    shade Missed = Vec3 0.04 0.05 0.08
+    shade r = scale (0.25 + 0.75 * facing r) (irColor r)
+    facing r = abs (dot (irNormal r) (Vec3 0 0 1))
 
 writePPM :: FilePath -> [[Vec3]] -> IO ()
 writePPM path = writeFile path . ppmText
@@ -24,8 +22,17 @@ writePPM path = writeFile path . ppmText
 camera :: Camera
 camera = Camera (Vec3 0 0 0) 50 36 24
 
-scene :: Mesh
-scene = Mesh (listArray (0, 7) (map place corners)) (listArray (0, 11) sides)
+scene :: Scene
+scene =
+    Scene
+        [ colored (Vec3 0.9 0.4 0.25) (meshShape (cube 22 (Vec3 0 0 (-170))))
+        , colored (Vec3 0.3 0.55 0.95) (meshShape (cube 12 (Vec3 42 (-18) (-130))))
+        , colored (Vec3 0.45 0.8 0.4) (meshShape (cube 9 (Vec3 (-38) 21 (-150))))
+        ]
+
+cube :: Scalar -> Point -> Mesh
+cube size center =
+    Mesh (listArray (0, 7) (map place corners)) (listArray (0, 11) sides)
   where
     corners =
         [ Vec3 x y z
@@ -33,8 +40,7 @@ scene = Mesh (listArray (0, 7) (map place corners)) (listArray (0, 11) sides)
         , y <- [-1, 1]
         , z <- [-1, 1]
         ]
-    place = translate . rotX 0.5 . rotY 0.6 . scale 22
-    translate v = v + Vec3 0 0 (-170)
+    place v = center + rotX 0.5 (rotY 0.6 (scale size v))
     sides =
         [ (0, 1, 3), (0, 3, 2)
         , (4, 6, 7), (4, 7, 5)

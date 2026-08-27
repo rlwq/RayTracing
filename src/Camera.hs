@@ -5,7 +5,7 @@ module Camera (
 ) where
 
 import Algebra
-import Geometry
+import Ray
 
 data Camera = Camera
     { camOrigin :: Point
