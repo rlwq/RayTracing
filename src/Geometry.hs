@@ -1,5 +1,6 @@
 module Geometry (
     Ray (..),
+    Triangle,
     intersectTriangle,
 ) where
 
@@ -11,7 +12,7 @@ data Ray = Ray Point Direction
 
 type Triangle = (,,) Point Point Point
 
-intersectTriangle :: Ray -> Triangle -> Maybe Point
+intersectTriangle :: Ray -> Triangle -> Maybe (Distance, Point)
 intersectTriangle (Ray o d) (v1, v2, v3) = do
     let e1 = v2 - v1
         e2 = v3 - v1
@@ -27,7 +28,7 @@ intersectTriangle (Ray o d) (v1, v2, v3) = do
     guard (v >= 0 && u + v <= 1)
     let t = dot e2 qv * invDet
     guard (t > epsilon)
-    pure (o + scale t d)
+    pure (t, o + scale t d)
 
 epsilon :: Scalar
 epsilon = 1e-6
